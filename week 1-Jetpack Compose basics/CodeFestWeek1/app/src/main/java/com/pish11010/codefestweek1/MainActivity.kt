@@ -20,10 +20,17 @@ class MainActivity : ComponentActivity() {
       CodeFestWeek1Theme {
         // A surface container using the 'background' color from the theme
         Surface(color = MaterialTheme.colors.background) {
-          Greeting("Android")
+          MyApp()
         }
       }
     }
+  }
+}
+
+@Composable
+private fun MyApp() {
+  Surface(color = MaterialTheme.colors.background) {
+    Greeting("Android")
   }
 }
 
@@ -34,10 +41,10 @@ fun Greeting(name: String) {
   }
 }
 
-@Preview(showBackground = true, name = "Text preview")
+@Preview(showBackground = true, name = "Default preview")
 @Composable
 fun DefaultPreview() {
   CodeFestWeek1Theme {
-    Greeting("Android")
+    MyApp()
   }
 }
