@@ -92,13 +92,18 @@ val topics = listOf(
 
 @Composable
 fun BodyContent(modifier: Modifier = Modifier) {
-  Row(modifier = modifier.horizontalScroll(rememberScrollState())) {
-    StaggeredGrid {
-      for (topic in topics) {
-        Chip(modifier = Modifier.padding(8.dp), text = topic)
+  Row(modifier = modifier
+    .background(color = Color.LightGray)
+    .padding(16.dp)
+    .size(200.dp)
+    .horizontalScroll(rememberScrollState()),
+    content = {
+      StaggeredGrid {
+        for (topic in topics) {
+          Chip(modifier = Modifier.padding(8.dp), text = topic)
+        }
       }
-    }
-  }
+    })
 }
 
 @Preview
@@ -199,59 +204,6 @@ fun PhotographerCardPreview() {
   }
 }
 
-fun Modifier.firstBaselineToTop(
-  firstBaselineToTop: Dp,
-) = this.then(
-  layout { measurable, constraints ->
-    val placeable = measurable.measure(constraints)
-
-    // Check the composable has a first baseline
-    check(placeable[FirstBaseline] != AlignmentLine.Unspecified)
-    val firstBaseline = placeable[FirstBaseline]
-
-    // Height of the composable with padding - first baseline
-    val placeableY = firstBaselineToTop.roundToPx() - firstBaseline
-    val height = placeable.height + placeableY
-    layout(placeable.width, height) {
-      // Where the composable gets placed
-      placeable.placeRelative(0, placeableY)
-    }
-  }
-)
-
-@Composable
-fun MyOwnColumn(
-  modifier: Modifier = Modifier,
-  content: @Composable () -> Unit
-) {
-  Layout(
-    modifier = modifier,
-    content = content
-  ) { measurables, constraints ->
-    // Don't constrain child views further, measure them with given constraints
-    // List of measured children
-    val placeables = measurables.map { measurable ->
-      // Measure each child
-      measurable.measure(constraints)
-    }
-
-    // Track the y co-ord we have placed children up to
-    var yPosition = 0
-
-    // Set the size of the layout as big as it can
-    layout(constraints.maxWidth, constraints.maxHeight) {
-      // Place children in the parent layout
-      placeables.forEach { placeable ->
-        // Position item on the screen
-        placeable.placeRelative(x = 0, y = yPosition)
-
-        // Record the y co-ord placed up to
-        yPosition += placeable.height
-      }
-    }
-  }
-}
-
 @Composable
 fun StaggeredGrid(
   modifier: Modifier = Modifier,
@@ -272,7 +224,6 @@ fun StaggeredGrid(
     // Don't constrain child views further, measure them with given constraints
     // List of measured children
     val placeables = measurables.mapIndexed { index, measurable ->
-
       // Measure each child
       val placeable = measurable.measure(constraints)
 
@@ -296,12 +247,12 @@ fun StaggeredGrid(
     // Y of each row, based on the height accumulation of previous rows
     val rowY = IntArray(rows) { 0 }
     for (i in 1 until rows) {
-      rowY[i] = rowY[i-1] + rowHeights[i-1]
+      rowY[i] = rowY[i - 1] + rowHeights[i - 1]
     }
 
     // Set the size of the parent layout
     layout(width, height) {
-      // x cord we have placed up to, per row
+      // x co-ord we have placed up to, per row
       val rowX = IntArray(rows) { 0 }
 
       placeables.forEachIndexed { index, placeable ->
