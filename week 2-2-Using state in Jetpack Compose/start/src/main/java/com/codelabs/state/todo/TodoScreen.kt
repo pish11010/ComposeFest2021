@@ -51,37 +51,37 @@ import kotlin.random.Random
  */
 @Composable
 fun TodoScreen(
-    items: List<TodoItem>,
-    onAddItem: (TodoItem) -> Unit,
-    onRemoveItem: (TodoItem) -> Unit
+  items: List<TodoItem>,
+  onAddItem: (TodoItem) -> Unit,
+  onRemoveItem: (TodoItem) -> Unit,
 ) {
-    Column {
-        TodoItemInputBackground(elevate = true, modifier = Modifier.fillMaxWidth()) {
-            TodoItemInput(onItemComplete = onAddItem)
-        }
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(top = 8.dp)
-        ) {
-            items(items = items) {
-                TodoRow(
-                    todo = it,
-                    onItemClicked = { onRemoveItem(it) },
-                    modifier = Modifier.fillParentMaxWidth()
-                )
-            }
-        }
-
-        // For quick testing, a random item generator button
-        Button(
-            onClick = { onAddItem(generateRandomTodoItem()) },
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-        ) {
-            Text("Add random item")
-        }
+  Column {
+    TodoItemInputBackground(elevate = true, modifier = Modifier.fillMaxWidth()) {
+      TodoItemEntryInput(onItemComplete = onAddItem)
     }
+    LazyColumn(
+      modifier = Modifier.weight(1f),
+      contentPadding = PaddingValues(top = 8.dp)
+    ) {
+      items(items = items) {
+        TodoRow(
+          todo = it,
+          onItemClicked = { onRemoveItem(it) },
+          modifier = Modifier.fillParentMaxWidth()
+        )
+      }
+    }
+
+    // For quick testing, a random item generator button
+    Button(
+      onClick = { onAddItem(generateRandomTodoItem()) },
+      modifier = Modifier
+        .padding(16.dp)
+        .fillMaxWidth(),
+    ) {
+      Text("Add random item")
+    }
+  }
 }
 
 /**
@@ -93,93 +93,112 @@ fun TodoScreen(
  */
 @Composable
 fun TodoRow(
-    todo: TodoItem,
-    onItemClicked: (TodoItem) -> Unit,
-    modifier: Modifier = Modifier,
-    iconAlpha: Float = remember(todo.id) { randomTint() }
+  todo: TodoItem,
+  onItemClicked: (TodoItem) -> Unit,
+  modifier: Modifier = Modifier,
+  iconAlpha: Float = remember(todo.id) { randomTint() },
 ) {
-    Row(
-        modifier = modifier
-            .clickable { onItemClicked(todo) }
-            .padding(horizontal = 16.dp)
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(todo.task)
-        Icon(
-            imageVector = todo.icon.imageVector,
-            tint = LocalContentColor.current.copy(alpha = iconAlpha),
-            contentDescription = stringResource(id = todo.icon.contentDescription)
-        )
-    }
+  Row(
+    modifier = modifier
+      .clickable { onItemClicked(todo) }
+      .padding(horizontal = 16.dp)
+      .padding(vertical = 8.dp),
+    horizontalArrangement = Arrangement.SpaceBetween
+  ) {
+    Text(todo.task)
+    Icon(
+      imageVector = todo.icon.imageVector,
+      tint = LocalContentColor.current.copy(alpha = iconAlpha),
+      contentDescription = stringResource(id = todo.icon.contentDescription)
+    )
+  }
 }
 
 private fun randomTint(): Float {
-    return Random.nextFloat().coerceIn(0.3f, 0.9f)
+  return Random.nextFloat().coerceIn(0.3f, 0.9f)
 }
 
 @Preview
 @Composable
 fun PreviewTodoScreen() {
-    val items = listOf(
-        TodoItem("Learn compose", TodoIcon.Event),
-        TodoItem("Take the codelab"),
-        TodoItem("Apply state", TodoIcon.Done),
-        TodoItem("Build dynamic UIs", TodoIcon.Square)
-    )
-    TodoScreen(items, {}, {})
+  val items = listOf(
+    TodoItem("Learn compose", TodoIcon.Event),
+    TodoItem("Take the codelab"),
+    TodoItem("Apply state", TodoIcon.Done),
+    TodoItem("Build dynamic UIs", TodoIcon.Square)
+  )
+  TodoScreen(items, {}, {})
 }
 
 @Preview
 @Composable
 fun PreviewTodoRow() {
-    val todo = remember { generateRandomTodoItem() }
-    TodoRow(todo = todo, onItemClicked = {}, modifier = Modifier.fillMaxWidth())
+  val todo = remember { generateRandomTodoItem() }
+  TodoRow(todo = todo, onItemClicked = {}, modifier = Modifier.fillMaxWidth())
 }
 
 @Composable
 fun TodoInputTextField(text: String, onTextChange: (String) -> Unit, modifier: Modifier) {
-    TodoInputText(text, onTextChange, modifier)
+  TodoInputText(text, onTextChange, modifier)
 }
 
 @Composable
-fun TodoItemInput(onItemComplete: (TodoItem) -> Unit) {
-    val (text, setText) = remember { mutableStateOf("") }
-    val (icon, setIcon) = remember { mutableStateOf(TodoIcon.Default)}
-    val iconsVisible = text.isNotBlank()
-    val submit = {
-        onItemComplete(TodoItem(text, icon))
-        setIcon(TodoIcon.Default)
-        setText("")
+fun TodoItemEntryInput(onItemComplete: (TodoItem) -> Unit) {
+  val (text, setText) = remember { mutableStateOf("") }
+  val (icon, setIcon) = remember { mutableStateOf(TodoIcon.Default) }
+  val iconsVisible = text.isNotBlank()
+  val submit = {
+    onItemComplete(TodoItem(text, icon))
+    setIcon(TodoIcon.Default)
+    setText("")
+  }
+  TodoItemInput(
+    text = text,
+    onTextChange = setText,
+    submit = submit,
+    setIcon = setIcon,
+    onIconChange = icon,
+    iconsVisible = iconsVisible
+  )
+}
+
+@Composable
+fun TodoItemInput(
+  text: String,
+  onTextChange: (String) -> Unit,
+  submit: () -> Unit,
+  setIcon: (TodoIcon) -> Unit,
+  onIconChange: TodoIcon,
+  iconsVisible: Boolean,
+) {
+  Column {
+    Row(Modifier
+      .padding(horizontal = 16.dp)
+      .padding(top = 16.dp)
+    ) {
+      TodoInputText(
+        text = text,
+        onTextChange = onTextChange,
+        modifier = Modifier
+          .weight(1f)
+          .padding(end = 8.dp),
+        onImeAction = submit
+      )
+      TodoEditButton(
+        onClick = submit,
+        text = "Add",
+        modifier = Modifier.align(Alignment.CenterVertically),
+        enabled = text.isNotBlank()
+      )
     }
-    Column {
-        Row(Modifier
-            .padding(horizontal = 16.dp)
-            .padding(top = 16.dp)
-        ) {
-            TodoInputText(
-                text = text,
-                onTextChange = setText,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp),
-                onImeAction = submit
-            )
-            TodoEditButton(
-                onClick = submit,
-                text = "Add",
-                modifier = Modifier.align(Alignment.CenterVertically),
-                enabled = text.isNotBlank()
-            )
-        }
-        if (iconsVisible) {
-            AnimatedIconRow(icon, setIcon, Modifier.padding(top = 8.dp))
-        } else {
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+    if (iconsVisible) {
+      AnimatedIconRow(onIconChange, setIcon, Modifier.padding(top = 8.dp))
+    } else {
+      Spacer(modifier = Modifier.height(16.dp))
     }
+  }
 }
 
 @Preview
 @Composable
-fun PreviewTodoItemInput() = TodoItemInput(onItemComplete = { })
+fun PreviewTodoItemInput() = TodoItemEntryInput(onItemComplete = { })
