@@ -78,36 +78,33 @@ fun RallyApp() {
         )
       }
     ) { innerPadding ->
-      RallyNavHost(navController, innerPadding)
+      RallyNavHost(navController, Modifier.padding(innerPadding))
     }
   }
 }
 
 @Composable
-private fun RallyNavHost(
+fun RallyNavHost(
   navController: NavHostController,
-  innerPadding: PaddingValues,
+  modifier: Modifier = Modifier,
 ) {
   NavHost(
     navController = navController,
     startDestination = RallyScreen.Overview.name,
-    modifier = Modifier.padding(innerPadding)
+    modifier = modifier
   ) {
     composable(RallyScreen.Overview.name) {
       OverviewBody(
         onClickSeeAllAccounts = { navController.navigate(RallyScreen.Accounts.name) },
         onClickSeeAllBills = { navController.navigate(RallyScreen.Bills.name) },
         onAccountClick = { name ->
-          navigateToSingleAccount(navController, name)
+          navController.navigate("${RallyScreen.Accounts.name}/$name")
         },
       )
     }
     composable(RallyScreen.Accounts.name) {
       AccountsBody(accounts = UserData.accounts) { name ->
-        navigateToSingleAccount(
-          navController = navController,
-          accountName = name
-        )
+        navController.navigate("Accounts/${name}")
       }
     }
     composable(RallyScreen.Bills.name) {
@@ -122,22 +119,13 @@ private fun RallyNavHost(
           type = NavType.StringType
         }
       ),
-      deepLinks =  listOf(navDeepLink {
+      deepLinks = listOf(navDeepLink {
         uriPattern = "rally://$accountsName/{name}"
       })
-    ) { entry -> // Look up "name" in NavBackStackEntry's arguments
+    ) { entry ->
       val accountName = entry.arguments?.getString("name")
-      // Find first name match in UserData
       val account = UserData.getAccount(accountName)
-      // Pass account to SingleAccountBody
       SingleAccountBody(account = account)
     }
   }
-}
-
-private fun navigateToSingleAccount(
-  navController: NavHostController,
-  accountName: String,
-) {
-  navController.navigate("${RallyScreen.Accounts.name}/$accountName")
 }
