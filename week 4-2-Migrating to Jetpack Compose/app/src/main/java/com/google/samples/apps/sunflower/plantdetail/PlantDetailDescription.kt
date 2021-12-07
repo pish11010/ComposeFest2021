@@ -22,7 +22,5 @@ import androidx.compose.runtime.Composable
 
 @Composable
 fun PlantDetailDescription() {
-    Surface {
-        Text("Hello Compose")
-    }
+  Text("Hello Compose")
 }
