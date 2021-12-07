@@ -1,15 +1,22 @@
 package com.example.compose.rally
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasParent
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.printToLog
 import com.example.compose.rally.ui.components.RallyTopAppBar
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
@@ -54,4 +61,22 @@ class TopAppBarTest {
       )
       .assertExists()
   }
+
+
+  @Test
+  fun rallyTopAppBarTest_selectTabBills() {
+    val currentScreen = mutableStateOf(RallyScreen.Accounts)
+    composeTestRule.setContent {
+      RallyTopAppBar(
+        allScreens = RallyScreen.values().toList(),
+        onTabSelected = { currentScreen.value = it },
+        currentScreen = currentScreen.value
+      )
+    }
+    composeTestRule
+      .onNodeWithContentDescription(RallyScreen.Bills.name)
+      .performClick()
+    assertEquals(RallyScreen.Bills, currentScreen.value)
+  }
+
 }
