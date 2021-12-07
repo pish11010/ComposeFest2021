@@ -76,7 +76,33 @@ class TopAppBarTest {
     composeTestRule
       .onNodeWithContentDescription(RallyScreen.Bills.name)
       .performClick()
+
     assertEquals(RallyScreen.Bills, currentScreen.value)
   }
 
+  @Test
+  fun rallyTopAppBarTest_selectTabOverview() {
+    val currentScreen = mutableStateOf(RallyScreen.Accounts)
+    composeTestRule.setContent {
+      RallyTopAppBar(
+        allScreens = RallyScreen.values().toList(),
+        onTabSelected = { currentScreen.value = it },
+        currentScreen = currentScreen.value
+      )
+    }
+
+    composeTestRule
+      .onNodeWithContentDescription(RallyScreen.Accounts.name)
+      .assertIsSelected()
+
+    composeTestRule
+      .onNodeWithContentDescription(RallyScreen.Overview.name)
+      .performClick()
+
+    assertEquals(RallyScreen.Overview, currentScreen.value)
+
+    composeTestRule
+      .onNodeWithContentDescription(RallyScreen.Overview.name)
+      .assertIsSelected()
+  }
 }
